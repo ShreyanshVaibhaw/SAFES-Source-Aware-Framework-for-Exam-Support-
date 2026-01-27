@@ -1,1 +1,269 @@
-# Application Configuration
+# =============================================================================
+# SAFES - Source-Aware Framework for Exam Support
+# Main Configuration File
+# =============================================================================
+# This file contains all application settings. Environment-specific values
+# (like API keys) should be set in .env file, not here.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# APP SETTINGS
+# General application configuration
+# -----------------------------------------------------------------------------
+app:
+  name: "AI Study Assistant"
+  version: "1.0.0"
+  description: "Exam-Focused Generative AI Study Assistant using RAG"
+  debug: true  # Set to false in production
+
+# -----------------------------------------------------------------------------
+# DOCUMENT PROCESSING
+# Settings for parsing and chunking uploaded documents
+# -----------------------------------------------------------------------------
+document_processing:
+  # Maximum file size allowed for uploads (in megabytes)
+  max_file_size_mb: 50
+
+  # Supported file formats for upload
+  allowed_extensions:
+    - ".pdf"
+    - ".docx"
+    - ".txt"
+    - ".md"
+
+  # Text chunking settings (in tokens)
+  # Smaller chunks = more precise retrieval, larger chunks = more context
+  chunk_size: 500        # Target size for each text chunk
+  chunk_overlap: 50      # Overlap between consecutive chunks to maintain context
+  min_chunk_size: 100    # Minimum chunk size (smaller chunks are merged)
+
+  # Upload and processing directories
+  upload_dir: "data/uploads"
+  processed_dir: "data/processed"
+
+# -----------------------------------------------------------------------------
+# VECTOR DATABASE
+# Configuration for document embeddings and similarity search
+# -----------------------------------------------------------------------------
+vector_database:
+  # Database type: "chromadb" or "faiss"
+  type: "chromadb"
+
+  # Collection name for storing document embeddings
+  collection_name: "study_materials"
+
+  # Sentence transformer model for generating embeddings
+  # all-MiniLM-L6-v2: Fast, good quality, 384 dimensions
+  # all-mpnet-base-v2: Higher quality, slower, 768 dimensions
+  embedding_model: "sentence-transformers/all-MiniLM-L6-v2"
+
+  # Directory to persist vector database
+  persist_directory: "data/vectordb"
+
+  # Embedding dimension (must match the model)
+  embedding_dimension: 384
+
+# -----------------------------------------------------------------------------
+# LLM CONFIGURATION
+# Settings for the language model used for answer generation
+# -----------------------------------------------------------------------------
+llm:
+  # LLM provider: "openai", "anthropic", "local"
+  provider: "openai"
+
+  # Model to use for generation
+  # gpt-3.5-turbo: Fast, cost-effective
+  # gpt-4: Higher quality, more expensive
+  # gpt-4-turbo: Balance of quality and speed
+  model: "gpt-3.5-turbo"
+
+  # Temperature controls randomness (0.0 = deterministic, 1.0 = creative)
+  # Lower values recommended for factual Q&A
+  temperature: 0.3
+
+  # Maximum tokens in the generated response
+  max_tokens: 1500
+
+  # Request timeout in seconds
+  timeout: 60
+
+  # Retry settings for API calls
+  max_retries: 3
+  retry_delay: 1  # seconds
+
+# -----------------------------------------------------------------------------
+# RETRIEVAL SETTINGS
+# Configuration for document retrieval and context building
+# -----------------------------------------------------------------------------
+retrieval:
+  # Number of most similar chunks to retrieve
+  top_k: 5
+
+  # Minimum similarity score (0.0 to 1.0) for a chunk to be considered relevant
+  # Higher threshold = more strict matching
+  similarity_threshold: 0.7
+
+  # Maximum tokens to include in context sent to LLM
+  max_context_tokens: 2000
+
+  # Whether to use hybrid search (semantic + keyword)
+  use_hybrid_search: false
+
+  # Re-ranking settings
+  rerank_results: true
+  rerank_top_k: 10  # Retrieve more initially, then rerank to top_k
+
+# -----------------------------------------------------------------------------
+# HALLUCINATION CONTROL
+# Settings to ensure answers are grounded in source materials
+# -----------------------------------------------------------------------------
+hallucination_control:
+  # Minimum confidence score (0.0 to 1.0) required for an answer
+  # Below this threshold, the system will indicate uncertainty
+  confidence_threshold: 0.6
+
+  # Whether every claim must have a citation
+  require_citation: true
+
+  # Maximum ratio of answer content that can be unsupported by sources
+  # 0.2 means at most 20% of the answer can lack direct source support
+  max_unsupported_ratio: 0.2
+
+  # Action when hallucination is detected: "warn", "refuse", "flag"
+  on_hallucination: "warn"
+
+  # Enable source verification check
+  verify_sources: true
+
+# -----------------------------------------------------------------------------
+# BLOOM'S TAXONOMY
+# Response style configuration based on cognitive levels
+# -----------------------------------------------------------------------------
+blooms_taxonomy:
+  # Default cognitive level if not specified
+  default_level: "understand"
+
+  # Available levels and their descriptions
+  levels:
+    remember:
+      description: "Recall facts and basic concepts"
+      prompt_style: "direct and factual"
+    understand:
+      description: "Explain ideas or concepts"
+      prompt_style: "explanatory with examples"
+    apply:
+      description: "Use information in new situations"
+      prompt_style: "practical with step-by-step guidance"
+    analyze:
+      description: "Draw connections among ideas"
+      prompt_style: "comparative and analytical"
+    evaluate:
+      description: "Justify a decision or course of action"
+      prompt_style: "critical with pros and cons"
+    create:
+      description: "Produce new or original work"
+      prompt_style: "generative and creative"
+
+# -----------------------------------------------------------------------------
+# CITATION SETTINGS
+# Configuration for source attribution in responses
+# -----------------------------------------------------------------------------
+citations:
+  # Citation format: "inline", "footnote", "endnote"
+  format: "inline"
+
+  # Include page numbers in citations when available
+  include_page_numbers: true
+
+  # Include section headers in citations when available
+  include_sections: true
+
+  # Maximum citations per response
+  max_citations: 10
+
+# -----------------------------------------------------------------------------
+# API SETTINGS
+# FastAPI backend server configuration
+# -----------------------------------------------------------------------------
+api:
+  host: "0.0.0.0"
+  port: 8000
+
+  # CORS settings
+  cors:
+    allow_origins:
+      - "http://localhost:8501"  # Streamlit default
+      - "http://localhost:3000"  # React default
+    allow_methods:
+      - "GET"
+      - "POST"
+      - "PUT"
+      - "DELETE"
+    allow_headers:
+      - "*"
+
+  # Rate limiting (requests per minute)
+  rate_limit: 60
+
+  # Request size limit in MB
+  max_request_size_mb: 100
+
+# -----------------------------------------------------------------------------
+# FRONTEND SETTINGS
+# Streamlit UI configuration
+# -----------------------------------------------------------------------------
+frontend:
+  # Backend API URL
+  api_url: "http://localhost:8000"
+
+  # Page configuration
+  page_title: "AI Study Assistant"
+  page_icon: "📚"
+  layout: "wide"
+
+  # Theme settings
+  theme:
+    primary_color: "#4F46E5"
+    background_color: "#FFFFFF"
+    text_color: "#1F2937"
+
+# -----------------------------------------------------------------------------
+# LOGGING
+# Application logging configuration
+# -----------------------------------------------------------------------------
+logging:
+  # Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: "DEBUG"
+
+  # Log file settings
+  file:
+    enabled: true
+    path: "logs/app.log"
+    rotation: "10 MB"    # Rotate when file reaches this size
+    retention: "7 days"  # Keep logs for this duration
+
+  # Console logging
+  console:
+    enabled: true
+    colorize: true
+
+# -----------------------------------------------------------------------------
+# EXAM HELPER SETTINGS
+# Configuration for exam preparation features
+# -----------------------------------------------------------------------------
+exam_helper:
+  # Question generation settings
+  questions_per_topic: 5
+
+  # Difficulty levels
+  difficulty_levels:
+    - "easy"
+    - "medium"
+    - "hard"
+
+  # Question types to generate
+  question_types:
+    - "multiple_choice"
+    - "short_answer"
+    - "true_false"
+    - "fill_in_blank"
