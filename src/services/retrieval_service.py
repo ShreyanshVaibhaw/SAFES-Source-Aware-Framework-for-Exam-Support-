@@ -30,10 +30,24 @@ class RetrievalService:
             self.vector_store = vector_store
         else:
             store_type = self.config.get("vector_database.type", "chromadb").lower()
+            persist_dir = str(self.config.vectordb_dir)
+            collection_name = self.config.get(
+                "vector_database.collection_name", "study_materials"
+            )
             if store_type == "faiss":
-                self.vector_store = FaissStore(self.embedding_service)
+                embedding_dim = int(
+                    self.config.get("vector_database.embedding_dimension", 384)
+                )
+                self.vector_store = FaissStore(
+                    persist_directory=persist_dir,
+                    embedding_dimension=embedding_dim,
+                    collection_name=collection_name,
+                )
             else:
-                self.vector_store = ChromaStore(self.embedding_service)
+                self.vector_store = ChromaStore(
+                    persist_directory=persist_dir,
+                    collection_name=collection_name,
+                )
 
     def index_document(self, document: ProcessedDocument) -> int:
         """Generate embeddings and index all chunks of one document."""

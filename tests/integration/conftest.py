@@ -1,13 +1,17 @@
+import os
 from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
 
-from src.api.main import app
+from src.api.main import create_app
 
 
 @pytest.fixture
-def test_client():
+def test_client(tmp_path: Path):
+    # Each test gets its own vector store directory
+    os.environ["CHROMA_PERSIST_DIR"] = str(tmp_path / "vectordb")
+    app = create_app()
     with TestClient(app) as client:
         yield client
 
