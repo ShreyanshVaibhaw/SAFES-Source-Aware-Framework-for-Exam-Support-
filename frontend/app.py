@@ -108,6 +108,24 @@ def study_guide_tab() -> None:
             st.error(res.text)
 
 
+def compare_tab() -> None:
+    render_section_header("Compare Topics", "Compare two topics from your uploaded materials.")
+    col1, col2 = st.columns(2)
+    topic_a = col1.text_input("Topic A", placeholder="e.g., TCP")
+    topic_b = col2.text_input("Topic B", placeholder="e.g., UDP")
+    if st.button("Compare"):
+        if not topic_a or not topic_b:
+            st.warning("Please enter both topics.")
+            return
+        res = api_post("/study/compare", payload={"topic_a": topic_a, "topic_b": topic_b})
+        if res.ok:
+            data = res.json()
+            st.markdown(data.get("comparison", ""))
+            st.caption(f"Sources used: {data.get('sources_a', 0)} for {topic_a}, {data.get('sources_b', 0)} for {topic_b}")
+        else:
+            st.error(res.text)
+
+
 def practice_test_tab() -> None:
     render_section_header("Practice Test")
     topics_raw = st.text_input("Topics", value="revision")
@@ -182,14 +200,16 @@ def main() -> None:
     init_styles()
     sidebar_documents()
 
-    tabs = st.tabs(["Query", "Study Guide", "Practice Test", "Analytics"])
+    tabs = st.tabs(["Query", "Study Guide", "Compare Topics", "Practice Test", "Analytics"])
     with tabs[0]:
         query_tab()
     with tabs[1]:
         study_guide_tab()
     with tabs[2]:
-        practice_test_tab()
+        compare_tab()
     with tabs[3]:
+        practice_test_tab()
+    with tabs[4]:
         analytics_tab()
 
 

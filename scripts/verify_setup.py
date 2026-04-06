@@ -110,11 +110,11 @@ def check_vector_and_embeddings() -> bool:
 
 
 def check_llm_libraries() -> bool:
-    """Check LLM integration libraries."""
-    print_header("LLM INTEGRATION")
+    """Check LLM integration libraries (multi-provider)."""
+    print_header("LLM INTEGRATION (Multi-Provider)")
     all_ok = True
 
-    # OpenAI
+    # OpenAI (also used for Ollama via OpenAI-compatible API)
     try:
         import openai
         print_status("OpenAI", True, openai.__version__)
@@ -122,31 +122,21 @@ def check_llm_libraries() -> bool:
         print_status(f"OpenAI - {e}", False)
         all_ok = False
 
-    # LangChain Core (new package structure)
+    # Anthropic
     try:
-        import langchain_core
-        print_status("LangChain-Core", True, langchain_core.__version__)
+        import anthropic
+        print_status("Anthropic", True, anthropic.__version__)
     except ImportError as e:
-        print_status(f"LangChain-Core - {e}", False)
-        all_ok = False
+        print_status(f"Anthropic - {e}", False)
 
-    # LangChain Community
+    # Google Gemini
     try:
-        import langchain_community
-        print_status("LangChain-Community", True, langchain_community.__version__)
-    except ImportError as e:
-        print_status(f"LangChain-Community - {e}", False)
-        all_ok = False
-
-    # LangChain OpenAI
-    try:
-        import langchain_openai
+        import google.generativeai
         from importlib.metadata import version
-        lc_openai_version = version("langchain-openai")
-        print_status("LangChain-OpenAI", True, lc_openai_version)
+        gemini_version = version("google-generativeai")
+        print_status("Google Gemini", True, gemini_version)
     except ImportError as e:
-        print_status(f"LangChain-OpenAI - {e}", False)
-        all_ok = False
+        print_status(f"Google Gemini - {e}", False)
 
     # Tiktoken
     try:
@@ -251,22 +241,37 @@ def check_configuration() -> bool:
 
 
 def check_openai_api_key() -> bool:
-    """Check if OpenAI API key is configured."""
-    print_header("API KEY CHECK")
+    """Check if any LLM API key is configured."""
+    print_header("LLM API KEY CHECK")
 
     import os
-    api_key = os.getenv("OPENAI_API_KEY")
+    found_any = False
 
-    if api_key:
-        # Mask the key for security
-        masked = api_key[:8] + "..." + api_key[-4:] if len(api_key) > 12 else "***"
-        print_status(f"OPENAI_API_KEY is set ({masked})", True)
-        return True
-    else:
-        print_status("OPENAI_API_KEY not set", False)
-        print("    Set it in configs/.env or as environment variable")
-        print("    LLM features will not work without it")
-        return False  # Return False but don't fail the whole setup
+    for key_name in ["OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY"]:
+        api_key = os.getenv(key_name)
+        if api_key:
+            masked = api_key[:8] + "..." + api_key[-4:] if len(api_key) > 12 else "***"
+            print_status(f"{key_name} is set ({masked})", True)
+            found_any = True
+        else:
+            print_status(f"{key_name} not set", False)
+
+    # Check Ollama availability
+    try:
+        import requests
+        ollama_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+        resp = requests.get(f"{ollama_url}/api/tags", timeout=2)
+        if resp.ok:
+            print_status("Ollama is running", True)
+            found_any = True
+    except Exception:
+        print_status("Ollama not running (optional)", False)
+
+    if not found_any:
+        print("    Set one of the API keys in configs/.env or run Ollama locally")
+        print("    LLM features will use fallback mode without any provider")
+
+    return found_any
 
 
 def check_logger() -> bool:

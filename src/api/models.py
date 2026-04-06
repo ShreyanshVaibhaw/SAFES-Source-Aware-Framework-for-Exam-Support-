@@ -47,6 +47,19 @@ class PracticeTestResponse(BaseModel):
     questions: List[Dict]
 
 
+class TopicCompareRequest(BaseModel):
+    topic_a: str = Field(..., min_length=1)
+    topic_b: str = Field(..., min_length=1)
+
+
+class TopicCompareResponse(BaseModel):
+    topic_a: str
+    topic_b: str
+    comparison: str
+    sources_a: int
+    sources_b: int
+
+
 class QueryHistoryResponse(BaseModel):
     history: List[Dict]
     total: int

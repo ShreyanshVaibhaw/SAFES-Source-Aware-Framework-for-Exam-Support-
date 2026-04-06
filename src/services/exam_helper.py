@@ -40,6 +40,24 @@ class ExamHelperService:
             difficulty=difficulty,
         )
 
+    def compare_topics(self, topic_a: str, topic_b: str) -> Dict:
+        """Compare two topics using retrieved context."""
+        results_a = self.retrieval_service.semantic_search(topic_a, top_k=5)
+        results_b = self.retrieval_service.semantic_search(topic_b, top_k=5)
+        context_a = self.retrieval_service.build_context(results_a)["text"] if results_a else ""
+        context_b = self.retrieval_service.build_context(results_b)["text"] if results_b else ""
+
+        comparison = self.llm_service.generate_comparison(
+            topic_a=topic_a, topic_b=topic_b, context_a=context_a, context_b=context_b
+        )
+        return {
+            "topic_a": topic_a,
+            "topic_b": topic_b,
+            "comparison": comparison,
+            "sources_a": len(results_a),
+            "sources_b": len(results_b),
+        }
+
     def extract_key_concepts(self, max_terms: int = 20) -> List[Dict]:
         """Extract frequent terms from all indexed chunks."""
         all_results = self.retrieval_service.vector_store.similarity_search(

@@ -17,6 +17,8 @@ from src.api.models import (
     QueryStatsResponse,
     StudyGuideRequest,
     StudyGuideResponse,
+    TopicCompareRequest,
+    TopicCompareResponse,
 )
 from src.core.rag_engine import RAGEngine
 from src.services.exam_helper import ExamHelperService
@@ -103,6 +105,16 @@ def generate_practice_test(
         difficulty=request.difficulty,
     )
     return PracticeTestResponse(**payload)
+
+
+@router.post("/study/compare", response_model=TopicCompareResponse)
+def compare_topics(
+    request: TopicCompareRequest,
+    exam_helper: ExamHelperService = Depends(get_exam_helper),
+) -> TopicCompareResponse:
+    """Compare two topics using uploaded materials."""
+    result = exam_helper.compare_topics(topic_a=request.topic_a, topic_b=request.topic_b)
+    return TopicCompareResponse(**result)
 
 
 @router.get("/study/key-concepts")
