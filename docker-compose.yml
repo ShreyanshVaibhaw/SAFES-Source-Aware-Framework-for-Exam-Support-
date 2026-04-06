@@ -7,27 +7,37 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./data:/app/data
-      - ./logs:/app/logs
+      - safes_data:/app/data
+      - safes_logs:/app/logs
     environment:
+      - LLM_PROVIDER=${LLM_PROVIDER:-openai}
+      - LLM_MODEL=${LLM_MODEL:-glm-5}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - ENVIRONMENT=production
       - LOG_LEVEL=INFO
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
+      start_period: 30s
       retries: 3
     restart: unless-stopped
 
   frontend:
     build: .
-    command: streamlit run frontend/app.py --server.port 8501 --server.address 0.0.0.0
+    command: streamlit run frontend/app.py --server.port 8501 --server.address 0.0.0.0 --server.headless true
     ports:
-      - "8501:8501"
+      - "80:8501"
     environment:
       - API_URL=http://api:8000
     depends_on:
       api:
         condition: service_healthy
     restart: unless-stopped
+
+volumes:
+  safes_data:
+  safes_logs:

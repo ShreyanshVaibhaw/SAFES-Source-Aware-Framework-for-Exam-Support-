@@ -2,10 +2,17 @@
 
 from __future__ import annotations
 
+import sys
+from pathlib import Path
 from typing import List
 
 import requests
 import streamlit as st
+
+# Ensure project root is on sys.path so both `frontend.` and `src.` imports work
+_project_root = str(Path(__file__).parent.parent)
+if _project_root not in sys.path:
+    sys.path.insert(0, _project_root)
 
 from frontend.components.ui_components import (
     init_styles,
@@ -15,7 +22,9 @@ from frontend.components.ui_components import (
     render_section_header,
 )
 
-API_URL = st.secrets.get("API_URL", "http://localhost:8000")
+import os
+
+API_URL = os.getenv("API_URL", "http://localhost:8000")
 
 
 def api_get(path: str):
