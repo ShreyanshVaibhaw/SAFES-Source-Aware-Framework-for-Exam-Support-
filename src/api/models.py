@@ -45,3 +45,15 @@ class PracticeTestRequest(BaseModel):
 class PracticeTestResponse(BaseModel):
     difficulty: str
     questions: List[Dict]
+
+
+class QueryHistoryResponse(BaseModel):
+    history: List[Dict]
+    total: int
+
+
+class QueryStatsResponse(BaseModel):
+    total_queries: int
+    avg_confidence: float
+    avg_response_time_ms: float
+    queries_by_bloom_level: Dict

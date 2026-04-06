@@ -9,6 +9,7 @@ from src.services.document_service import DocumentService
 from src.services.embedding_service import EmbeddingService
 from src.services.exam_helper import ExamHelperService
 from src.services.llm_service import LLMService
+from src.services.query_history_service import QueryHistoryService
 from src.services.retrieval_service import RetrievalService
 from src.utils.config import config
 
@@ -19,7 +20,12 @@ def init_services() -> dict:
     retrieval = RetrievalService(embedding_service=embedding, config=config)
     llm = LLMService(config=config)
     document = DocumentService(config=config)
-    rag = RAGEngine(retrieval_service=retrieval, llm_service=llm)
+    history = QueryHistoryService()
+    rag = RAGEngine(
+        retrieval_service=retrieval,
+        llm_service=llm,
+        query_history_service=history,
+    )
     exam = ExamHelperService(retrieval_service=retrieval, llm_service=llm)
     return {
         "embedding_service": embedding,
@@ -28,6 +34,7 @@ def init_services() -> dict:
         "document_service": document,
         "rag_engine": rag,
         "exam_helper": exam,
+        "query_history": history,
     }
 
 
@@ -45,3 +52,7 @@ def get_rag_engine(request: Request) -> RAGEngine:
 
 def get_exam_helper(request: Request) -> ExamHelperService:
     return request.app.state.services["exam_helper"]
+
+
+def get_query_history(request: Request) -> QueryHistoryService:
+    return request.app.state.services["query_history"]

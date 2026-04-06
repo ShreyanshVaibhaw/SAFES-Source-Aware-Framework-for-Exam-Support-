@@ -1,4 +1,4 @@
-"""Query, study guide, and practice test routes."""
+"""Query, study guide, practice test, and history routes."""
 
 from __future__ import annotations
 
@@ -7,17 +7,20 @@ from typing import AsyncGenerator
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 
-from src.api.dependencies import get_exam_helper, get_rag_engine
+from src.api.dependencies import get_exam_helper, get_query_history, get_rag_engine
 from src.api.models import (
     PracticeTestRequest,
     PracticeTestResponse,
+    QueryHistoryResponse,
     QueryRequest,
     QueryResponse,
+    QueryStatsResponse,
     StudyGuideRequest,
     StudyGuideResponse,
 )
 from src.core.rag_engine import RAGEngine
 from src.services.exam_helper import ExamHelperService
+from src.services.query_history_service import QueryHistoryService
 
 router = APIRouter(tags=["query"])
 
@@ -58,6 +61,26 @@ def stream_query(
             yield token + " "
 
     return StreamingResponse(token_stream(), media_type="text/plain")
+
+
+@router.get("/query/history", response_model=QueryHistoryResponse)
+def get_history(
+    limit: int = 20,
+    offset: int = 0,
+    history: QueryHistoryService = Depends(get_query_history),
+) -> QueryHistoryResponse:
+    """Get query history, newest first."""
+    records = history.get_history(limit=limit, offset=offset)
+    return QueryHistoryResponse(history=records, total=len(history._records))
+
+
+@router.get("/query/stats", response_model=QueryStatsResponse)
+def get_query_stats(
+    history: QueryHistoryService = Depends(get_query_history),
+) -> QueryStatsResponse:
+    """Get aggregate query statistics."""
+    stats = history.get_stats()
+    return QueryStatsResponse(**stats)
 
 
 @router.post("/study/guide", response_model=StudyGuideResponse)

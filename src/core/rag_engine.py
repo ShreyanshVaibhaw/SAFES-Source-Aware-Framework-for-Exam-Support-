@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from time import perf_counter
 from typing import Dict, List, Optional
 
 from src.core.blooms_taxonomy import BloomsTaxonomyService
@@ -22,6 +23,7 @@ class RAGEngine:
         llm_service: Optional[LLMService] = None,
         config: Optional[ConfigLoader] = None,
         nlp_service=None,
+        query_history_service=None,
     ) -> None:
         self.config = config or global_config
         self.retrieval_service = retrieval_service
@@ -33,6 +35,7 @@ class RAGEngine:
             nlp_service=nlp_service,
         )
         self.blooms = BloomsTaxonomyService()
+        self._history = query_history_service
 
     def answer_question(
         self,
@@ -44,6 +47,8 @@ class RAGEngine:
         include_citations: bool = True,
     ) -> Dict:
         """Generate an answer grounded in retrieved chunks."""
+        start = perf_counter()
+
         level = bloom_level or self.blooms.detect_level(question).value
         results = self.retrieval_service.semantic_search(
             query=question,
@@ -52,7 +57,7 @@ class RAGEngine:
         )
 
         if not results:
-            return {
+            result = {
                 "question": question,
                 "answer": "No relevant content found in uploaded documents.",
                 "bloom_level": level,
@@ -64,6 +69,8 @@ class RAGEngine:
                     "recommendations": ["Upload more relevant source material."],
                 },
             }
+            self._record_history(result, start)
+            return result
 
         context_payload = self.retrieval_service.build_context(results)
         answer = self.llm_service.generate_answer(question, context_payload["text"], level)
@@ -103,7 +110,7 @@ class RAGEngine:
                 "Please upload more relevant source material or rephrase your question."
             )
 
-        return {
+        result = {
             "question": question,
             "answer": answer_with_citations,
             "bloom_level": level,
@@ -122,3 +129,29 @@ class RAGEngine:
             ],
             "practice_questions": self.blooms.generate_practice_questions("the topic", level),
         }
+
+        self._record_history(result, start)
+        return result
+
+    def _record_history(self, result: Dict, start_time: float) -> None:
+        """Record query to history service if available."""
+        if self._history is None:
+            return
+        try:
+            elapsed_ms = (perf_counter() - start_time) * 1000
+            doc_ids = list({
+                c.get("document_id", "")
+                for c in result.get("retrieved_chunks", [])
+                if c.get("document_id")
+            })
+            self._history.record_query(
+                question=result["question"],
+                answer=result["answer"],
+                bloom_level=result.get("bloom_level", "understand"),
+                confidence=result.get("confidence", 0.0),
+                citations_count=len(result.get("citations", [])),
+                document_ids=doc_ids,
+                response_time_ms=elapsed_ms,
+            )
+        except Exception:
+            pass  # Never let history recording break the query pipeline
