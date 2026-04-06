@@ -9,6 +9,8 @@ from src.core.citation_manager import CitationManager
 from src.core.hallucination_detector import HallucinationDetector
 from src.services.llm_service import LLMService
 from src.services.retrieval_service import RetrievalService
+from src.utils.config import ConfigLoader
+from src.utils.config import config as global_config
 
 
 class RAGEngine:
@@ -18,11 +20,18 @@ class RAGEngine:
         self,
         retrieval_service: RetrievalService,
         llm_service: Optional[LLMService] = None,
+        config: Optional[ConfigLoader] = None,
+        nlp_service=None,
     ) -> None:
+        self.config = config or global_config
         self.retrieval_service = retrieval_service
         self.llm_service = llm_service or LLMService()
         self.citation_manager = CitationManager()
-        self.hallucination_detector = HallucinationDetector()
+        self.hallucination_detector = HallucinationDetector(
+            config=self.config,
+            llm_service=self.llm_service,
+            nlp_service=nlp_service,
+        )
         self.blooms = BloomsTaxonomyService()
 
     def answer_question(
@@ -84,6 +93,15 @@ class RAGEngine:
                 "recommendations": [],
             }
         )
+
+        # Apply on_hallucination action
+        on_action = grounding.get("on_hallucination", "warn")
+        if not grounding.get("is_grounded", True) and on_action == "refuse":
+            answer_with_citations = (
+                "I cannot provide a reliable answer based on the uploaded materials. "
+                "The generated response did not meet the grounding confidence threshold. "
+                "Please upload more relevant source material or rephrase your question."
+            )
 
         return {
             "question": question,
