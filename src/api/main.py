@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.api.dependencies import init_services
+from src.api.middleware.rate_limiter import RateLimiterMiddleware
 from src.api.routers.documents import router as documents_router
 from src.api.routers.query import router as query_router
 from src.utils.config import config
@@ -29,6 +30,10 @@ def create_app() -> FastAPI:
         allow_methods=config.get("api.cors.allow_methods", ["*"]),
         allow_headers=config.get("api.cors.allow_headers", ["*"]),
     )
+
+    # Rate limiting
+    rate_limit = int(config.get("api.rate_limit", 60))
+    app.add_middleware(RateLimiterMiddleware, requests_per_minute=rate_limit)
 
     @app.on_event("startup")
     async def startup_event() -> None:
