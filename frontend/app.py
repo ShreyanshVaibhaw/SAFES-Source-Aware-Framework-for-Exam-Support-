@@ -1,7 +1,8 @@
-"""Streamlit frontend for SAFES."""
+"""SAFES - Streamlit frontend with modern interactive design."""
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 from typing import List
@@ -16,200 +17,518 @@ if _project_root not in sys.path:
 
 from frontend.components.ui_components import (
     init_styles,
+    render_answer,
     render_citations,
     render_confidence_meter,
     render_document_card,
+    render_footer,
+    render_grounding_alert,
+    render_hero,
+    render_practice_questions,
     render_section_header,
 )
-
-import os
 
 API_URL = os.getenv("API_URL", "http://localhost:8000")
 
 
 def api_get(path: str):
-    return requests.get(f"{API_URL}{path}", timeout=60)
+    try:
+        return requests.get(f"{API_URL}{path}", timeout=60)
+    except requests.exceptions.RequestException:
+        return None
 
 
 def api_post(path: str, payload=None, files=None, data=None):
-    return requests.post(f"{API_URL}{path}", json=payload, files=files, data=data, timeout=120)
+    try:
+        return requests.post(
+            f"{API_URL}{path}", json=payload, files=files, data=data, timeout=120
+        )
+    except requests.exceptions.RequestException:
+        return None
 
 
 def api_delete(path: str):
-    return requests.delete(f"{API_URL}{path}", timeout=60)
+    try:
+        return requests.delete(f"{API_URL}{path}", timeout=60)
+    except requests.exceptions.RequestException:
+        return None
+
+
+def _ok(res) -> bool:
+    """Safe check for response object."""
+    return res is not None and res.ok
+
+
+# =============================================================================
+# SIDEBAR - DOCUMENT MANAGEMENT
+# =============================================================================
 
 
 def sidebar_documents() -> None:
-    st.sidebar.header("Documents")
-    uploaded = st.sidebar.file_uploader(
-        "Upload PDF/DOCX/TXT/MD", type=["pdf", "docx", "txt", "md"], accept_multiple_files=False
-    )
-    if uploaded and st.sidebar.button("Upload"):
-        files = {"file": (uploaded.name, uploaded.getvalue(), uploaded.type or "application/octet-stream")}
-        res = api_post("/documents/upload", files=files)
-        if res.ok:
-            st.sidebar.success("Document uploaded and indexed.")
-        else:
-            st.sidebar.error(res.text)
+    with st.sidebar:
+        st.markdown(
+            """
+            <div style="text-align: center; padding: 8px 0 16px 0;">
+              <div style="font-size: 2rem; font-weight: 800;
+                          background: linear-gradient(135deg, #4F46E5, #7C3AED);
+                          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+                          background-clip: text; letter-spacing: -0.02em;">
+                SAFES
+              </div>
+              <div style="font-size: 0.7rem; color: #6B7280; text-transform: uppercase;
+                          letter-spacing: 0.1em; font-weight: 600;">
+                Study Assistant
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
 
-    docs_res = api_get("/documents")
-    if docs_res.ok:
-        docs = docs_res.json().get("documents", [])
-        st.sidebar.caption(f"{len(docs)} document(s) indexed")
-        for doc in docs:
-            if st.sidebar.button(f"Delete {doc['filename']}", key=f"delete-{doc['document_id']}"):
-                delete_res = api_delete(f"/documents/{doc['document_id']}")
-                if delete_res.ok:
-                    st.sidebar.success(f"Deleted {doc['filename']}")
+        st.markdown("---")
+        st.markdown("### 📚 Documents")
+        st.caption("Upload your study materials below")
+
+        uploaded = st.file_uploader(
+            "Drop a file here",
+            type=["pdf", "docx", "txt", "md"],
+            accept_multiple_files=False,
+            label_visibility="collapsed",
+        )
+        if uploaded and st.button("Upload & Index", type="primary", use_container_width=True):
+            with st.spinner(f"Processing {uploaded.name}..."):
+                files = {
+                    "file": (
+                        uploaded.name,
+                        uploaded.getvalue(),
+                        uploaded.type or "application/octet-stream",
+                    )
+                }
+                res = api_post("/documents/upload", files=files)
+                if _ok(res):
+                    st.success(f"✅ {uploaded.name} indexed!")
                     st.rerun()
                 else:
-                    st.sidebar.error(delete_res.text)
+                    st.error(res.text if res is not None else "API unreachable")
+
+        # List existing documents
+        docs_res = api_get("/documents")
+        if _ok(docs_res):
+            docs = docs_res.json().get("documents", [])
+            st.markdown("---")
+            st.markdown(f"### 📂 Library ({len(docs)})")
+
+            if not docs:
+                st.info("No documents yet. Upload one above to get started.")
+            else:
+                for doc in docs:
+                    with st.container():
+                        col1, col2 = st.columns([4, 1])
+                        with col1:
+                            st.markdown(
+                                f"""
+                                <div style="font-size: 0.85rem; font-weight: 600; color: #1E1B4B;
+                                            white-space: nowrap; overflow: hidden;
+                                            text-overflow: ellipsis;">
+                                  {doc['filename']}
+                                </div>
+                                <div style="font-size: 0.7rem; color: #6B7280;">
+                                  {doc.get('chunks', 0)} chunks
+                                </div>
+                                """,
+                                unsafe_allow_html=True,
+                            )
+                        with col2:
+                            if st.button("🗑️", key=f"del-{doc['document_id']}", help="Delete"):
+                                delete_res = api_delete(f"/documents/{doc['document_id']}")
+                                if _ok(delete_res):
+                                    st.rerun()
+        else:
+            st.warning("⚠️ API not reachable. Start the backend server.")
+
+
+# =============================================================================
+# QUERY TAB
+# =============================================================================
 
 
 def query_tab() -> None:
-    render_section_header("Ask a Question", "Grounded answers from uploaded materials.")
-    question = st.text_area("Question", placeholder="Explain photosynthesis for exam revision")
-    bloom = st.selectbox(
-        "Bloom level",
-        ["auto", "remember", "understand", "apply", "analyze", "evaluate", "create"],
-        index=1,
+    render_section_header(
+        "Ask a Question",
+        "Get grounded answers with citations from your uploaded materials",
+        icon="💬",
     )
-    top_k = st.slider("Top-K chunks", min_value=1, max_value=10, value=5)
-    include_citations = st.checkbox("Include citations", value=True)
-    check_hall = st.checkbox("Hallucination check", value=True)
 
-    if st.button("Get Answer"):
-        payload = {
-            "question": question,
-            "bloom_level": None if bloom == "auto" else bloom,
-            "top_k": top_k,
-            "include_citations": include_citations,
-            "check_hallucination": check_hall,
-        }
-        res = api_post("/query", payload=payload)
-        if not res.ok:
-            st.error(res.text)
+    question = st.text_area(
+        "Your question",
+        placeholder="e.g., Explain the difference between TCP and UDP for my networks exam",
+        height=100,
+        label_visibility="collapsed",
+    )
+
+    col1, col2, col3 = st.columns([2, 1, 1])
+    with col1:
+        bloom = st.selectbox(
+            "🎓 Bloom Level",
+            ["auto", "remember", "understand", "apply", "analyze", "evaluate", "create"],
+            index=0,
+            help="Cognitive level — auto-detects from question keywords",
+        )
+    with col2:
+        top_k = st.slider("📊 Top-K", 1, 10, 5, help="Number of source chunks to retrieve")
+    with col3:
+        st.markdown('<div style="height: 28px;"></div>', unsafe_allow_html=True)
+        check_hall = st.toggle("Verify", value=True, help="Run hallucination check")
+
+    if st.button("✨ Get Answer", type="primary", use_container_width=True):
+        if not question.strip():
+            st.warning("Please enter a question first.")
             return
+
+        with st.spinner("🔍 Searching your materials and generating answer..."):
+            payload = {
+                "question": question,
+                "bloom_level": None if bloom == "auto" else bloom,
+                "top_k": top_k,
+                "include_citations": True,
+                "check_hallucination": check_hall,
+            }
+            res = api_post("/query", payload=payload)
+
+        if not _ok(res):
+            st.error(f"❌ {res.text if res is not None else 'API unreachable'}")
+            return
+
         data = res.json()
-        st.markdown("### Answer")
-        st.write(data["answer"])
-        render_confidence_meter(data.get("confidence", 0.0))
-        st.caption(f"Bloom level: {data.get('bloom_level')}")
+
+        # Render answer
+        render_answer(data["answer"])
+
+        # Confidence + bloom level
+        render_confidence_meter(data.get("confidence", 0.0), data.get("bloom_level", ""))
+
+        # Grounding alert
+        if check_hall and data.get("grounding"):
+            render_grounding_alert(data["grounding"])
+
+        # Citations
         render_citations(data.get("citations", []))
+
+        # Practice questions
         if data.get("practice_questions"):
-            st.markdown("### Practice Questions")
-            for item in data["practice_questions"]:
-                st.markdown(f"- {item}")
+            render_practice_questions(data["practice_questions"])
+
+
+# =============================================================================
+# STUDY GUIDE TAB
+# =============================================================================
 
 
 def study_guide_tab() -> None:
-    render_section_header("Study Guide")
-    topics_raw = st.text_input("Topics (comma-separated)", value="core concepts")
-    level = st.selectbox("Level", ["remember", "understand", "apply", "analyze", "evaluate", "create"], index=1)
-    if st.button("Generate Guide"):
+    render_section_header(
+        "Study Guide Generator",
+        "Generate exam-ready notes from your indexed materials",
+        icon="📖",
+    )
+
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        topics_raw = st.text_input(
+            "Topics (comma-separated)",
+            value="",
+            placeholder="e.g., photosynthesis, cell division, DNA replication",
+        )
+    with col2:
+        level = st.selectbox(
+            "Level",
+            ["remember", "understand", "apply", "analyze", "evaluate", "create"],
+            index=1,
+        )
+
+    if st.button("📝 Generate Study Guide", type="primary", use_container_width=True):
         topics = [t.strip() for t in topics_raw.split(",") if t.strip()]
-        res = api_post("/study/guide", payload={"topics": topics, "level": level})
-        if res.ok:
+        if not topics:
+            st.warning("Enter at least one topic.")
+            return
+        with st.spinner("Building your study guide..."):
+            res = api_post("/study/guide", payload={"topics": topics, "level": level})
+        if _ok(res):
             guide = res.json().get("guide", "")
-            st.markdown(guide)
-            st.download_button("Download Guide", guide, file_name="study_guide.md")
+            st.markdown(
+                f'<div class="safes-card">{guide.replace(chr(10), "<br/>")}</div>',
+                unsafe_allow_html=True,
+            )
+            st.download_button(
+                "⬇️ Download as Markdown",
+                guide,
+                file_name="study_guide.md",
+                mime="text/markdown",
+                use_container_width=True,
+            )
         else:
-            st.error(res.text)
+            st.error(res.text if res is not None else "API unreachable")
+
+
+# =============================================================================
+# COMPARE TOPICS TAB
+# =============================================================================
 
 
 def compare_tab() -> None:
-    render_section_header("Compare Topics", "Compare two topics from your uploaded materials.")
+    render_section_header(
+        "Compare Topics",
+        "Side-by-side comparison of two concepts from your materials",
+        icon="⚖️",
+    )
+
     col1, col2 = st.columns(2)
-    topic_a = col1.text_input("Topic A", placeholder="e.g., TCP")
-    topic_b = col2.text_input("Topic B", placeholder="e.g., UDP")
-    if st.button("Compare"):
+    with col1:
+        topic_a = st.text_input("📘 Topic A", placeholder="e.g., TCP")
+    with col2:
+        topic_b = st.text_input("📕 Topic B", placeholder="e.g., UDP")
+
+    if st.button("🔀 Compare", type="primary", use_container_width=True):
         if not topic_a or not topic_b:
             st.warning("Please enter both topics.")
             return
-        res = api_post("/study/compare", payload={"topic_a": topic_a, "topic_b": topic_b})
-        if res.ok:
+        with st.spinner(f"Comparing {topic_a} vs {topic_b}..."):
+            res = api_post("/study/compare", payload={"topic_a": topic_a, "topic_b": topic_b})
+        if _ok(res):
             data = res.json()
-            st.markdown(data.get("comparison", ""))
-            st.caption(f"Sources used: {data.get('sources_a', 0)} for {topic_a}, {data.get('sources_b', 0)} for {topic_b}")
+            comparison = data.get("comparison", "")
+            st.markdown(
+                f'<div class="safes-answer">'
+                f'<div class="safes-answer-label">{topic_a} vs {topic_b}</div>'
+                f'{comparison.replace(chr(10), "<br/>")}'
+                f"</div>",
+                unsafe_allow_html=True,
+            )
+            col1, col2 = st.columns(2)
+            col1.metric(f"Sources for {topic_a}", data.get("sources_a", 0))
+            col2.metric(f"Sources for {topic_b}", data.get("sources_b", 0))
         else:
-            st.error(res.text)
+            st.error(res.text if res is not None else "API unreachable")
+
+
+# =============================================================================
+# PRACTICE TEST TAB
+# =============================================================================
 
 
 def practice_test_tab() -> None:
-    render_section_header("Practice Test")
-    topics_raw = st.text_input("Topics", value="revision")
-    difficulty = st.selectbox("Difficulty", ["easy", "medium", "hard"], index=1)
-    num_questions = st.slider("Number of questions", 1, 20, 5)
-    if st.button("Generate Practice Test"):
-        topics: List[str] = [t.strip() for t in topics_raw.split(",") if t.strip()]
-        res = api_post(
-            "/study/practice-test",
-            payload={"topics": topics, "difficulty": difficulty, "num_questions": num_questions},
+    render_section_header(
+        "Practice Test",
+        "Generate exam questions to test your knowledge",
+        icon="🎯",
+    )
+
+    col1, col2, col3 = st.columns([2, 1, 1])
+    with col1:
+        topics_raw = st.text_input(
+            "Topics",
+            placeholder="e.g., process scheduling, memory management",
         )
-        if res.ok:
+    with col2:
+        difficulty = st.selectbox("Difficulty", ["easy", "medium", "hard"], index=1)
+    with col3:
+        num_questions = st.slider("Count", 1, 20, 5)
+
+    if st.button("📝 Generate Test", type="primary", use_container_width=True):
+        topics: List[str] = [t.strip() for t in topics_raw.split(",") if t.strip()]
+        if not topics:
+            st.warning("Enter at least one topic.")
+            return
+        with st.spinner("Generating practice questions..."):
+            res = api_post(
+                "/study/practice-test",
+                payload={
+                    "topics": topics,
+                    "difficulty": difficulty,
+                    "num_questions": num_questions,
+                },
+            )
+        if _ok(res):
             payload = res.json()
-            for question in payload.get("questions", []):
-                st.markdown(f"**{question['question']}**")
-                st.caption(f"Hint: {question['hint']}")
+            for i, question in enumerate(payload.get("questions", []), 1):
+                st.markdown(
+                    f"""
+                    <div class="safes-card" style="border-left: 3px solid var(--safes-violet);">
+                      <div style="display: flex; gap: 12px; align-items: flex-start;">
+                        <div class="safes-citation-id"
+                             style="background: linear-gradient(135deg, #7C3AED, #DB2777);">{i}</div>
+                        <div style="flex: 1;">
+                          <div style="font-weight: 600; color: #1E1B4B; margin-bottom: 6px;">
+                            {question.get('question', '')}
+                          </div>
+                          <div style="font-size: 0.8rem; color: #6B7280;">
+                            💡 {question.get('hint', '')}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
         else:
-            st.error(res.text)
+            st.error(res.text if res is not None else "API unreachable")
+
+
+# =============================================================================
+# ANALYTICS TAB
+# =============================================================================
 
 
 def analytics_tab() -> None:
-    render_section_header("Analytics")
+    render_section_header(
+        "Analytics & History",
+        "Query history, performance stats, and system health",
+        icon="📊",
+    )
 
-    # Query history stats
+    # Query stats
     stats_res = api_get("/query/stats")
-    if stats_res.ok:
+    if _ok(stats_res):
         stats = stats_res.json()
         col1, col2, col3 = st.columns(3)
-        col1.metric("Total Queries", stats.get("total_queries", 0))
-        col2.metric("Avg Confidence", f"{stats.get('avg_confidence', 0):.0%}")
-        col3.metric("Avg Response Time", f"{stats.get('avg_response_time_ms', 0):.0f}ms")
+        col1.metric("📈 Total Queries", stats.get("total_queries", 0))
+        col2.metric("🎯 Avg Confidence", f"{stats.get('avg_confidence', 0):.0%}")
+        col3.metric("⚡ Avg Response", f"{stats.get('avg_response_time_ms', 0):.0f}ms")
 
         bloom_data = stats.get("queries_by_bloom_level", {})
         if bloom_data:
             st.markdown("**Queries by Bloom Level:**")
-            for level, count in bloom_data.items():
-                st.caption(f"  {level}: {count}")
+            cols = st.columns(len(bloom_data))
+            for i, (level, count) in enumerate(bloom_data.items()):
+                cols[i].markdown(
+                    f"""
+                    <div class="safes-card" style="text-align: center; padding: 12px;">
+                      <div style="font-size: 1.4rem; font-weight: 800;
+                                  background: linear-gradient(135deg, #4F46E5, #7C3AED);
+                                  -webkit-background-clip: text;
+                                  -webkit-text-fill-color: transparent;
+                                  background-clip: text;">{count}</div>
+                      <div style="font-size: 0.7rem; color: #6B7280;
+                                  text-transform: uppercase; letter-spacing: 0.05em;">
+                        {level}
+                      </div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
 
-    # Query history table
     st.markdown("---")
-    render_section_header("Query History")
+    render_section_header("Recent Queries", "Last 10 questions you asked", icon="🕐")
+
     history_res = api_get("/query/history?limit=10")
-    if history_res.ok:
+    if _ok(history_res):
         history = history_res.json().get("history", [])
         if history:
             for item in history:
-                with st.expander(f"{item.get('question', '')[:80]}..."):
-                    st.write(item.get("answer", "")[:300])
-                    st.caption(
-                        f"Bloom: {item.get('bloom_level')} | "
-                        f"Confidence: {item.get('confidence', 0):.0%} | "
-                        f"Citations: {item.get('citations_count', 0)} | "
-                        f"Time: {item.get('response_time_ms', 0):.0f}ms"
+                conf = item.get("confidence", 0)
+                conf_color = "#10B981" if conf >= 0.75 else "#F59E0B" if conf >= 0.5 else "#F43F5E"
+                with st.expander(f"❓ {item.get('question', '')[:90]}"):
+                    st.markdown(
+                        f'<div class="safes-answer" style="margin: 0;">'
+                        f'{item.get("answer", "")[:500]}</div>',
+                        unsafe_allow_html=True,
+                    )
+                    st.markdown(
+                        f"""
+                        <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px;">
+                          <span class="safes-badge safes-badge-violet">
+                            Bloom: {item.get('bloom_level', 'understand')}
+                          </span>
+                          <span class="safes-badge" style="background: {conf_color}20;
+                                                            color: {conf_color};
+                                                            border-color: {conf_color}40;">
+                            {conf:.0%} confidence
+                          </span>
+                          <span class="safes-badge safes-badge-indigo">
+                            {item.get('citations_count', 0)} citations
+                          </span>
+                          <span class="safes-badge safes-badge-mint">
+                            {item.get('response_time_ms', 0):.0f}ms
+                          </span>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
                     )
         else:
-            st.info("No queries recorded yet.")
+            st.markdown(
+                '<div class="safes-card" style="text-align: center; color: #6B7280;">'
+                "No queries recorded yet. Ask a question in the Query tab!</div>",
+                unsafe_allow_html=True,
+            )
 
-    # System health
     st.markdown("---")
-    render_section_header("System Health")
+    render_section_header("System Health", "Vector store stats and document library", icon="⚕️")
+
     health = api_get("/health")
     docs = api_get("/documents")
-    if health.ok:
-        st.json(health.json())
-    if docs.ok:
-        for doc in docs.json().get("documents", []):
-            render_document_card(doc)
+    if _ok(health):
+        h = health.json()
+        vs = h.get("vector_store", {})
+        col1, col2 = st.columns(2)
+        col1.metric("🟢 API Status", h.get("status", "unknown").upper())
+        col2.metric("🗂️ Indexed Records", vs.get("records", 0))
+
+    if _ok(docs):
+        docs_list = docs.json().get("documents", [])
+        if docs_list:
+            st.markdown("**Document Library:**")
+            for doc in docs_list:
+                render_document_card(doc)
+
+
+# =============================================================================
+# MAIN
+# =============================================================================
+
+
+def get_doc_count() -> int:
+    try:
+        res = api_get("/documents")
+        return len(res.json().get("documents", [])) if _ok(res) else 0
+    except Exception:
+        return 0
+
+
+def get_query_count() -> int:
+    try:
+        res = api_get("/query/stats")
+        return res.json().get("total_queries", 0) if _ok(res) else 0
+    except Exception:
+        return 0
 
 
 def main() -> None:
-    st.set_page_config(page_title="AI Study Assistant", layout="wide")
+    st.set_page_config(
+        page_title="SAFES — AI Study Assistant",
+        page_icon="📚",
+        layout="wide",
+        initial_sidebar_state="expanded",
+    )
     init_styles()
+
+    # Sidebar (documents)
     sidebar_documents()
 
-    tabs = st.tabs(["Query", "Study Guide", "Compare Topics", "Practice Test", "Analytics"])
+    # Hero header with live stats
+    render_hero(
+        doc_count=get_doc_count(),
+        query_count=get_query_count(),
+        llm_model="GLM-5",
+    )
+
+    # Main tabs
+    tabs = st.tabs(
+        [
+            "💬 Query",
+            "📖 Study Guide",
+            "⚖️ Compare",
+            "🎯 Practice Test",
+            "📊 Analytics",
+        ]
+    )
     with tabs[0]:
         query_tab()
     with tabs[1]:
@@ -220,6 +539,8 @@ def main() -> None:
         practice_test_tab()
     with tabs[4]:
         analytics_tab()
+
+    render_footer()
 
 
 if __name__ == "__main__":
