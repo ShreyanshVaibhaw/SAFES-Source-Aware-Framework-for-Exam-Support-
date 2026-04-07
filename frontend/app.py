@@ -26,6 +26,7 @@ from frontend.components.ui_components import (
     render_hero,
     render_practice_questions,
     render_section_header,
+    theme_selector,
 )
 
 API_URL = os.getenv("API_URL", "http://localhost:8000")
@@ -66,35 +67,16 @@ def _ok(res) -> bool:
 
 def sidebar_documents() -> None:
     with st.sidebar:
-        st.markdown(
-            """
-            <div style="text-align: center; padding: 8px 0 16px 0;">
-              <div style="font-size: 2rem; font-weight: 800;
-                          background: linear-gradient(135deg, #4F46E5, #7C3AED);
-                          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-                          background-clip: text; letter-spacing: -0.02em;">
-                SAFES
-              </div>
-              <div style="font-size: 0.7rem; color: #6B7280; text-transform: uppercase;
-                          letter-spacing: 0.1em; font-weight: 600;">
-                Study Assistant
-              </div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-
-        st.markdown("---")
         st.markdown("### 📚 Documents")
         st.caption("Upload your study materials below")
 
         uploaded = st.file_uploader(
-            "Drop a file here",
+            "Choose a file",
             type=["pdf", "docx", "txt", "md"],
             accept_multiple_files=False,
             label_visibility="collapsed",
         )
-        if uploaded and st.button("Upload & Index", type="primary", use_container_width=True):
+        if uploaded and st.button("📤 Upload & Index", type="primary", use_container_width=True):
             with st.spinner(f"Processing {uploaded.name}..."):
                 files = {
                     "file": (
@@ -507,9 +489,35 @@ def main() -> None:
         layout="wide",
         initial_sidebar_state="expanded",
     )
-    init_styles()
 
-    # Sidebar (documents)
+    # Initialize theme state and apply CSS
+    if "safes_theme" not in st.session_state:
+        st.session_state.safes_theme = "Light"
+    init_styles(st.session_state.safes_theme)
+
+    # Sidebar: brand + theme selector + documents
+    with st.sidebar:
+        st.markdown(
+            """
+            <div style="text-align: center; padding: 8px 0 16px 0;">
+              <div style="font-size: 2rem; font-weight: 800;
+                          background: linear-gradient(135deg, var(--safes-primary), var(--safes-primary-2));
+                          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+                          background-clip: text; letter-spacing: -0.02em;">
+                SAFES
+              </div>
+              <div style="font-size: 0.7rem; color: var(--safes-muted); text-transform: uppercase;
+                          letter-spacing: 0.1em; font-weight: 600;">
+                Study Assistant
+              </div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        # Theme selector (above documents)
+        theme_selector()
+        st.markdown("---")
+
     sidebar_documents()
 
     # Hero header with live stats
