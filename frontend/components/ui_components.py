@@ -660,13 +660,27 @@ section[data-testid="stSidebar"] h3 {{
   letter-spacing: -0.01em;
 }}
 
-/* === FILE UPLOADER (FIXED) === */
+/* === FILE UPLOADER (NUCLEAR FIX) === */
+section[data-testid="stFileUploader"] {{
+  background: transparent !important;
+}}
+
+section[data-testid="stFileUploader"] > div {{
+  background: transparent !important;
+  border: none !important;
+}}
+
 [data-testid="stFileUploaderDropzone"] {{
   background: var(--safes-surface-2) !important;
   border: 2px dashed var(--safes-border-2) !important;
   border-radius: 12px !important;
-  padding: 16px !important;
+  padding: 18px 16px !important;
   transition: all 0.2s ease;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 10px !important;
+  text-align: center !important;
 }}
 
 [data-testid="stFileUploaderDropzone"]:hover {{
@@ -674,41 +688,90 @@ section[data-testid="stSidebar"] h3 {{
   background: var(--safes-surface) !important;
 }}
 
-[data-testid="stFileUploaderDropzone"] small {{
-  color: var(--safes-muted) !important;
+/* Instructions block (text + icon) */
+[data-testid="stFileUploaderDropzoneInstructions"] {{
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 6px !important;
+  width: 100% !important;
+  background: transparent !important;
 }}
 
-[data-testid="stFileUploaderDropzone"] span {{
+[data-testid="stFileUploaderDropzoneInstructions"] svg {{
+  width: 28px !important;
+  height: 28px !important;
+  color: var(--safes-primary) !important;
+  fill: var(--safes-primary) !important;
+}}
+
+[data-testid="stFileUploaderDropzoneInstructions"] span {{
   color: var(--safes-text) !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
 }}
 
-/* The internal "Browse files" button - reset to clean state, not gradient */
-[data-testid="stFileUploaderDropzone"] button,
-[data-testid="stBaseButton-secondary"] {{
+[data-testid="stFileUploaderDropzoneInstructions"] small {{
+  color: var(--safes-muted) !important;
+  font-size: 0.7rem !important;
+}}
+
+/* === The INTERNAL Browse button - hide original text, use ::before === */
+[data-testid="stFileUploaderDropzone"] button {{
+  /* Hide whatever text Streamlit puts here */
+  font-size: 0 !important;
+  line-height: 0 !important;
+  text-indent: -9999px !important;
+  /* Then style the button itself */
   background: var(--safes-primary) !important;
   background-image: none !important;
-  color: white !important;
   border: none !important;
   border-radius: 8px !important;
-  padding: 6px 14px !important;
-  font-size: 0.8rem !important;
+  padding: 8px 18px !important;
+  min-width: 130px !important;
+  height: 36px !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+  text-shadow: none !important;
+  transition: all 0.2s ease !important;
+  position: relative !important;
+  overflow: hidden !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}}
+
+/* Hide ALL children of the button (including any nested spans/p elements) */
+[data-testid="stFileUploaderDropzone"] button > * {{
+  font-size: 0 !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+}}
+
+/* Inject our own clean text via pseudo-element */
+[data-testid="stFileUploaderDropzone"] button::before {{
+  content: '📁 Browse';
+  font-size: 0.85rem !important;
+  line-height: 1 !important;
   font-weight: 600 !important;
-  box-shadow: none !important;
-  text-shadow: none !important;
-  font-family: 'Inter', sans-serif !important;
-}}
-
-[data-testid="stFileUploaderDropzone"] button *,
-[data-testid="stBaseButton-secondary"] * {{
   color: white !important;
-  text-shadow: none !important;
+  text-indent: 0 !important;
+  font-family: 'Inter', -apple-system, sans-serif !important;
+  visibility: visible !important;
+  position: static !important;
+  display: inline-block !important;
+  width: auto !important;
+  height: auto !important;
 }}
 
-[data-testid="stFileUploaderDropzone"] button:hover,
-[data-testid="stBaseButton-secondary"]:hover {{
+[data-testid="stFileUploaderDropzone"] button:hover {{
   background: var(--safes-primary-2) !important;
-  transform: none !important;
-  color: white !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
 }}
 
 /* Uploaded file display */
@@ -721,6 +784,15 @@ section[data-testid="stSidebar"] h3 {{
 
 [data-testid="stFileUploaderFileName"] {{
   color: var(--safes-text) !important;
+}}
+
+[data-testid="stFileUploaderDeleteBtn"] button {{
+  background: transparent !important;
+  color: var(--safes-rose) !important;
+}}
+
+[data-testid="stFileUploaderDeleteBtn"] button::before {{
+  content: '' !important;
 }}
 
 /* === METRICS === */
