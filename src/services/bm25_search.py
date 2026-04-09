@@ -87,6 +87,11 @@ class BM25Index:
         self._avg_dl = 0.0
         self._n = 0
 
+    @property
+    def doc_count(self) -> int:
+        """Return the number of indexed documents."""
+        return len(self._docs)
+
     def _rebuild_stats(self) -> None:
         """Recalculate DF and average document length."""
         self._df.clear()
