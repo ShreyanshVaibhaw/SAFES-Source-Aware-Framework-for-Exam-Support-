@@ -216,3 +216,12 @@ class HallucinationDetector:
             "in", "on", "and", "or", "with", "that", "this",
         }
         return {term for term in re.findall(r"[a-zA-Z0-9_]+", text.lower()) if term not in stop}
+
+    def get_confidence_level(self, confidence: float) -> str:
+        """Categorize confidence score into level string."""
+        if confidence >= 0.8:
+            return "high"
+        elif confidence >= 0.5:
+            return "medium"
+        else:
+            return "low"
