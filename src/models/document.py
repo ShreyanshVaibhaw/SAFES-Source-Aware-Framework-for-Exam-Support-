@@ -90,6 +90,10 @@ class DocumentChunk(BaseModel):
             raise ValueError("numeric values must be >= 0")
         return value
 
+    def __str__(self) -> str:
+        preview = self.content[:50] + "..." if len(self.content) > 50 else self.content
+        return f"DocumentChunk(id={self.chunk_id}, doc={self.document_id}, tokens={self.token_count}, preview='{preview}')"
+
 
 class ProcessedDocument(BaseModel):
     """Container for the full processed output of an uploaded document."""
