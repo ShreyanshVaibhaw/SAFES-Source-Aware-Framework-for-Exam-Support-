@@ -8,7 +8,19 @@ from src.core.blooms_taxonomy import BloomsLevel, BloomsTaxonomyService
 
 
 def build_system_prompt(level: BloomsLevel | str) -> str:
-    """Build system instruction text."""
+    """Build system instruction text.
+
+    Args:
+        level: Bloom's taxonomy level or level string
+
+    Returns:
+        Formatted system prompt string
+
+    Example:
+        >>> prompt = build_system_prompt(BloomsLevel.UNDERSTAND)
+        >>> print(prompt)
+        You are an exam-focused study assistant...
+    """
     blooms = BloomsTaxonomyService()
     guideline = blooms.get_response_guideline(level)
     return (
