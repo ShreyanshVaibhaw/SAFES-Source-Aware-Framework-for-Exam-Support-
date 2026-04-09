@@ -14,6 +14,9 @@ class BloomsLevel(str, Enum):
     EVALUATE = "evaluate"
     CREATE = "create"
 
+    def __str__(self) -> str:
+        return self.value.title()
+
 
 class BloomsTaxonomyService:
     """Detect cognitive level and generate level-aware helper content."""
