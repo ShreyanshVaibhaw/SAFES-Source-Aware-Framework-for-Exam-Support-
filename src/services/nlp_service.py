@@ -122,3 +122,7 @@ class NLPService:
     def remove_stopwords(self, tokens: List[str]) -> List[str]:
         """Remove stopwords from a token list."""
         return [t for t in tokens if t.lower() not in STOP_WORDS]
+
+    def is_spacy_available(self) -> bool:
+        """Check if spaCy model is loaded and available."""
+        return self._spacy is not None
