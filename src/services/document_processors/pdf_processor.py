@@ -124,3 +124,7 @@ class PDFProcessor:
             return False, f"Invalid PDF: {exc}"
 
         return True, ""
+
+    def get_total_text_length(self, pages: List[Dict]) -> int:
+        """Return total character count across all page contents."""
+        return sum(len(page.get("content", "")) for page in pages)
