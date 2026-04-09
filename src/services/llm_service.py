@@ -300,3 +300,8 @@ class LLMService:
             (context_b[:300] if context_b else "No context available."),
         ]
         return "\n".join(lines)
+
+    @property
+    def is_available(self) -> bool:
+        """Check if an LLM provider is available."""
+        return self._client is not None
