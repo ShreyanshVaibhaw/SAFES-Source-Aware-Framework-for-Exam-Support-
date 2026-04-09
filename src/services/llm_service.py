@@ -305,3 +305,7 @@ class LLMService:
     def is_available(self) -> bool:
         """Check if an LLM provider is available."""
         return self._client is not None
+
+    def get_active_provider(self) -> Optional[str]:
+        """Return the name of the active LLM provider, or None if unavailable."""
+        return self._active_provider
