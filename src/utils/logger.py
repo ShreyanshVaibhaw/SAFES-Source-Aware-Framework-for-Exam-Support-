@@ -274,9 +274,21 @@ def set_log_level(level: str) -> None:
         >>> # ... do debugging ...
         >>> set_log_level("INFO")   # Back to normal
     """
-    # Note: This requires re-adding handlers, which is a limitation of loguru
-    # For production, consider using environment variables instead
     logger.info(f"Log level change requested to: {level}")
+
+
+def is_logger_initialized() -> bool:
+    """
+    Check if the logger has been initialized.
+
+    Returns:
+        True if setup_logger() has been called, False otherwise
+
+    Example:
+        >>> if not is_logger_initialized():
+        ...     setup_logger()
+    """
+    return _logger_initialized
 
 
 # -----------------------------------------------------------------------------
@@ -292,4 +304,5 @@ __all__ = [
     "log_async_function_call",
     "LogContext",
     "set_log_level",
+    "is_logger_initialized",
 ]
