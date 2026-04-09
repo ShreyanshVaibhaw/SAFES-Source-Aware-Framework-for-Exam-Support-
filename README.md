@@ -55,3 +55,6 @@ pytest tests/integration/ -v
 - `docs/USER_GUIDE.md`
 - `docs/DEVELOPER_GUIDE.md`
 - `docs/API_REFERENCE.md`
+
+## Contributors
+- [Harshit Kumar](https://github.com/Harshitkumar0018)
