@@ -63,3 +63,7 @@ class CitationManager:
         if mode == "footnote":
             return f"{answer}\n\nSources:\n{self.format_footnote(citations)}"
         return f"{answer}\n\nSources: {self.format_inline(citations)}"
+
+    def count_citations(self, citations: List[Dict]) -> int:
+        """Return the number of citations."""
+        return len(citations)
