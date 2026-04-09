@@ -185,6 +185,26 @@ code, pre, .stCode, [class*="language-"] {{
 footer {{visibility: hidden;}}
 header[data-testid="stHeader"] {{background: transparent;}}
 
+/* Hide the broken "keyboard_double_arrow" text on sidebar collapse button */
+[data-testid="stSidebarCollapseButton"],
+[data-testid="stSidebarCollapsedControl"],
+button[kind="header"] {{
+  font-size: 0 !important;
+  overflow: hidden !important;
+}}
+
+[data-testid="stSidebarCollapseButton"] span,
+[data-testid="stSidebarCollapsedControl"] span {{
+  font-size: 0 !important;
+  visibility: hidden !important;
+}}
+
+[data-testid="stSidebarCollapseButton"] svg,
+[data-testid="stSidebarCollapsedControl"] svg {{
+  visibility: visible !important;
+  font-size: 1.5rem !important;
+}}
+
 /* === Page background === */
 .stApp {{
   background: linear-gradient(180deg, var(--safes-bg-1) 0%, var(--safes-bg-2) 100%) !important;
