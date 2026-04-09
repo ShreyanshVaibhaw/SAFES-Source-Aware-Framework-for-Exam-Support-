@@ -71,6 +71,10 @@ class EmbeddingService:
             return 0.0
         return float(np.dot(a, b) / denom)
 
+    def get_dimension(self) -> int:
+        """Return the embedding dimension size."""
+        return self.embedding_dim
+
     def _fallback_embedding(self, text: str) -> List[float]:
         """Hash-based bag-of-words embedding for deterministic local behavior."""
         tokens = re.findall(r"[a-zA-Z0-9_]+", text.lower())
