@@ -71,5 +71,5 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
-# Claude Code settings (local)
+# Local IDE/tool settings
 .claude/
