@@ -1,4 +1,4 @@
-"""SAFES - Streamlit frontend with modern interactive design."""
+"""SAFES - Streamlit frontend with Ollama-inspired minimalist design."""
 
 from __future__ import annotations
 
@@ -26,7 +26,6 @@ from frontend.components.ui_components import (
     render_hero,
     render_practice_questions,
     render_section_header,
-    theme_selector,
 )
 
 API_URL = os.getenv("API_URL", "http://localhost:8000")
@@ -67,7 +66,7 @@ def _ok(res) -> bool:
 
 def sidebar_documents() -> None:
     with st.sidebar:
-        st.markdown("### 📚 Documents")
+        st.markdown("### Documents")
         st.caption("Upload your study materials below")
 
         uploaded = st.file_uploader(
@@ -76,7 +75,7 @@ def sidebar_documents() -> None:
             accept_multiple_files=False,
             label_visibility="collapsed",
         )
-        if uploaded and st.button("📤 Upload & Index", type="primary", use_container_width=True):
+        if uploaded and st.button("Upload", type="primary", use_container_width=True):
             with st.spinner(f"Processing {uploaded.name}..."):
                 files = {
                     "file": (
@@ -87,7 +86,7 @@ def sidebar_documents() -> None:
                 }
                 res = api_post("/documents/upload", files=files)
                 if _ok(res):
-                    st.success(f"✅ {uploaded.name} indexed!")
+                    st.success(f"{uploaded.name} indexed!")
                     st.rerun()
                 else:
                     st.error(res.text if res is not None else "API unreachable")
@@ -97,7 +96,7 @@ def sidebar_documents() -> None:
         if _ok(docs_res):
             docs = docs_res.json().get("documents", [])
             st.markdown("---")
-            st.markdown(f"### 📂 Library ({len(docs)})")
+            st.markdown(f"### Library ({len(docs)})")
 
             if not docs:
                 st.info("No documents yet. Upload one above to get started.")
@@ -120,7 +119,7 @@ def sidebar_documents() -> None:
                                 unsafe_allow_html=True,
                             )
                         with col2:
-                            if st.button("🗑️", key=f"del-{doc['document_id']}", help="Delete"):
+                            if st.button("x", key=f"del-{doc['document_id']}", help="Delete"):
                                 delete_res = api_delete(f"/documents/{doc['document_id']}")
                                 if _ok(delete_res):
                                     st.rerun()
@@ -137,7 +136,6 @@ def query_tab() -> None:
     render_section_header(
         "Ask a Question",
         "Get grounded answers with citations from your uploaded materials",
-        icon="💬",
     )
 
     question = st.text_area(
@@ -150,23 +148,23 @@ def query_tab() -> None:
     col1, col2, col3 = st.columns([2, 1, 1])
     with col1:
         bloom = st.selectbox(
-            "🎓 Bloom Level",
+            "Bloom Level",
             ["auto", "remember", "understand", "apply", "analyze", "evaluate", "create"],
             index=0,
             help="Cognitive level — auto-detects from question keywords",
         )
     with col2:
-        top_k = st.slider("📊 Top-K", 1, 10, 5, help="Number of source chunks to retrieve")
+        top_k = st.slider("Top-K", 1, 10, 5, help="Number of source chunks to retrieve")
     with col3:
         st.markdown('<div style="height: 28px;"></div>', unsafe_allow_html=True)
         check_hall = st.toggle("Verify", value=True, help="Run hallucination check")
 
-    if st.button("✨ Get Answer", type="primary", use_container_width=True):
+    if st.button("Get Answer", type="primary", use_container_width=True):
         if not question.strip():
             st.warning("Please enter a question first.")
             return
 
-        with st.spinner("🔍 Searching your materials and generating answer..."):
+        with st.spinner("Searching and generating answer..."):
             payload = {
                 "question": question,
                 "bloom_level": None if bloom == "auto" else bloom,
@@ -177,7 +175,7 @@ def query_tab() -> None:
             res = api_post("/query", payload=payload)
 
         if not _ok(res):
-            st.error(f"❌ {res.text if res is not None else 'API unreachable'}")
+            st.error(f"{res.text if res is not None else 'API unreachable'}")
             return
 
         data = res.json()
@@ -209,7 +207,6 @@ def study_guide_tab() -> None:
     render_section_header(
         "Study Guide Generator",
         "Generate exam-ready notes from your indexed materials",
-        icon="📖",
     )
 
     col1, col2 = st.columns([3, 1])
@@ -226,7 +223,7 @@ def study_guide_tab() -> None:
             index=1,
         )
 
-    if st.button("📝 Generate Study Guide", type="primary", use_container_width=True):
+    if st.button("Generate Guide", type="primary", use_container_width=True):
         topics = [t.strip() for t in topics_raw.split(",") if t.strip()]
         if not topics:
             st.warning("Enter at least one topic.")
@@ -240,7 +237,7 @@ def study_guide_tab() -> None:
                 unsafe_allow_html=True,
             )
             st.download_button(
-                "⬇️ Download as Markdown",
+                "Download",
                 guide,
                 file_name="study_guide.md",
                 mime="text/markdown",
@@ -259,16 +256,15 @@ def compare_tab() -> None:
     render_section_header(
         "Compare Topics",
         "Side-by-side comparison of two concepts from your materials",
-        icon="⚖️",
     )
 
     col1, col2 = st.columns(2)
     with col1:
-        topic_a = st.text_input("📘 Topic A", placeholder="e.g., TCP")
+        topic_a = st.text_input("Topic A", placeholder="e.g., TCP")
     with col2:
-        topic_b = st.text_input("📕 Topic B", placeholder="e.g., UDP")
+        topic_b = st.text_input("Topic B", placeholder="e.g., UDP")
 
-    if st.button("🔀 Compare", type="primary", use_container_width=True):
+    if st.button("Compare", type="primary", use_container_width=True):
         if not topic_a or not topic_b:
             st.warning("Please enter both topics.")
             return
@@ -300,7 +296,6 @@ def practice_test_tab() -> None:
     render_section_header(
         "Practice Test",
         "Generate exam questions to test your knowledge",
-        icon="🎯",
     )
 
     col1, col2, col3 = st.columns([2, 1, 1])
@@ -314,7 +309,7 @@ def practice_test_tab() -> None:
     with col3:
         num_questions = st.slider("Count", 1, 20, 5)
 
-    if st.button("📝 Generate Test", type="primary", use_container_width=True):
+    if st.button("Generate Test", type="primary", use_container_width=True):
         topics: List[str] = [t.strip() for t in topics_raw.split(",") if t.strip()]
         if not topics:
             st.warning("Enter at least one topic.")
@@ -363,7 +358,6 @@ def analytics_tab() -> None:
     render_section_header(
         "Analytics & History",
         "Query history, performance stats, and system health",
-        icon="📊",
     )
 
     # Query stats
@@ -371,9 +365,9 @@ def analytics_tab() -> None:
     if _ok(stats_res):
         stats = stats_res.json()
         col1, col2, col3 = st.columns(3)
-        col1.metric("📈 Total Queries", stats.get("total_queries", 0))
-        col2.metric("🎯 Avg Confidence", f"{stats.get('avg_confidence', 0):.0%}")
-        col3.metric("⚡ Avg Response", f"{stats.get('avg_response_time_ms', 0):.0f}ms")
+        col1.metric("Total Queries", stats.get("total_queries", 0))
+        col2.metric("Avg Confidence", f"{stats.get('avg_confidence', 0):.0%}")
+        col3.metric("Avg Response", f"{stats.get('avg_response_time_ms', 0):.0f}ms")
 
         bloom_data = stats.get("queries_by_bloom_level", {})
         if bloom_data:
@@ -383,12 +377,10 @@ def analytics_tab() -> None:
                 cols[i].markdown(
                     f"""
                     <div class="safes-card" style="text-align: center; padding: 12px;">
-                      <div style="font-size: 1.4rem; font-weight: 800;
-                                  background: linear-gradient(135deg, #4F46E5, #7C3AED);
-                                  -webkit-background-clip: text;
-                                  -webkit-text-fill-color: transparent;
-                                  background-clip: text;">{count}</div>
-                      <div style="font-size: 0.7rem; color: #6B7280;
+                      <div style="font-family: 'SF Pro Rounded', ui-rounded, system-ui, sans-serif;
+                                  font-size: 24px; font-weight: 500;
+                                  color: #000000;">{count}</div>
+                      <div style="font-size: 12px; color: #a3a3a3;
                                   text-transform: uppercase; letter-spacing: 0.05em;">
                         {level}
                       </div>
@@ -398,7 +390,7 @@ def analytics_tab() -> None:
                 )
 
     st.markdown("---")
-    render_section_header("Recent Queries", "Last 10 questions you asked", icon="🕐")
+    render_section_header("Recent Queries", "Last 10 questions you asked")
 
     history_res = api_get("/query/history?limit=10")
     if _ok(history_res):
@@ -406,8 +398,7 @@ def analytics_tab() -> None:
         if history:
             for item in history:
                 conf = item.get("confidence", 0)
-                conf_color = "#10B981" if conf >= 0.75 else "#F59E0B" if conf >= 0.5 else "#F43F5E"
-                with st.expander(f"❓ {item.get('question', '')[:90]}"):
+                with st.expander(f"{item.get('question', '')[:90]}"):
                     st.markdown(
                         f'<div class="safes-answer" style="margin: 0;">'
                         f'{item.get("answer", "")[:500]}</div>',
@@ -415,19 +406,17 @@ def analytics_tab() -> None:
                     )
                     st.markdown(
                         f"""
-                        <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px;">
-                          <span class="safes-badge safes-badge-violet">
-                            Bloom: {item.get('bloom_level', 'understand')}
+                        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px;">
+                          <span class="safes-badge">
+                            {item.get('bloom_level', 'understand')}
                           </span>
-                          <span class="safes-badge" style="background: {conf_color}20;
-                                                            color: {conf_color};
-                                                            border-color: {conf_color}40;">
+                          <span class="safes-badge">
                             {conf:.0%} confidence
                           </span>
-                          <span class="safes-badge safes-badge-indigo">
+                          <span class="safes-badge">
                             {item.get('citations_count', 0)} citations
                           </span>
-                          <span class="safes-badge safes-badge-mint">
+                          <span class="safes-badge">
                             {item.get('response_time_ms', 0):.0f}ms
                           </span>
                         </div>
@@ -436,13 +425,13 @@ def analytics_tab() -> None:
                     )
         else:
             st.markdown(
-                '<div class="safes-card" style="text-align: center; color: #6B7280;">'
-                "No queries recorded yet. Ask a question in the Query tab!</div>",
+                '<div class="safes-card" style="text-align: center; color: var(--stone);">'
+                "No queries recorded yet.</div>",
                 unsafe_allow_html=True,
             )
 
     st.markdown("---")
-    render_section_header("System Health", "Vector store stats and document library", icon="⚕️")
+    render_section_header("System Health", "Vector store stats and document library")
 
     health = api_get("/health")
     docs = api_get("/documents")
@@ -450,8 +439,8 @@ def analytics_tab() -> None:
         h = health.json()
         vs = h.get("vector_store", {})
         col1, col2 = st.columns(2)
-        col1.metric("🟢 API Status", h.get("status", "unknown").upper())
-        col2.metric("🗂️ Indexed Records", vs.get("records", 0))
+        col1.metric("API Status", h.get("status", "unknown").upper())
+        col2.metric("Indexed Records", vs.get("records", 0))
 
     if _ok(docs):
         docs_list = docs.json().get("documents", [])
@@ -485,58 +474,44 @@ def get_query_count() -> int:
 def main() -> None:
     st.set_page_config(
         page_title="SAFES — AI Study Assistant",
-        page_icon="📚",
+        page_icon="S",
         layout="wide",
         initial_sidebar_state="expanded",
     )
 
-    # Initialize theme state and apply CSS
-    if "safes_theme" not in st.session_state:
-        st.session_state.safes_theme = "Light"
-    init_styles(st.session_state.safes_theme)
+    init_styles()
 
-    # Sidebar: brand + theme selector + documents
+    # Sidebar branding
     with st.sidebar:
         st.markdown(
             """
-            <div style="text-align: center; padding: 8px 0 16px 0;">
-              <div style="font-size: 2rem; font-weight: 800;
-                          background: linear-gradient(135deg, var(--safes-primary), var(--safes-primary-2));
-                          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-                          background-clip: text; letter-spacing: -0.02em;">
+            <div style="text-align: center; padding: 12px 0 20px 0;">
+              <div style="font-family: 'SF Pro Rounded', ui-rounded, system-ui, sans-serif;
+                          font-size: 28px; font-weight: 500; color: #000000;
+                          letter-spacing: -0.02em;">
                 SAFES
               </div>
-              <div style="font-size: 0.7rem; color: var(--safes-muted); text-transform: uppercase;
-                          letter-spacing: 0.1em; font-weight: 600;">
+              <div style="font-size: 12px; color: #a3a3a3; text-transform: uppercase;
+                          letter-spacing: 0.1em; font-weight: 400; margin-top: 2px;">
                 Study Assistant
               </div>
             </div>
             """,
             unsafe_allow_html=True,
         )
-        # Theme selector (above documents)
-        theme_selector()
         st.markdown("---")
 
     sidebar_documents()
 
-    # Hero header with live stats
+    # Hero
     render_hero(
         doc_count=get_doc_count(),
         query_count=get_query_count(),
         llm_model="GLM-5",
     )
 
-    # Main tabs
-    tabs = st.tabs(
-        [
-            "💬 Query",
-            "📖 Study Guide",
-            "⚖️ Compare",
-            "🎯 Practice Test",
-            "📊 Analytics",
-        ]
-    )
+    # Tabs — no emoji, clean text
+    tabs = st.tabs(["Query", "Study Guide", "Compare", "Practice Test", "Analytics"])
     with tabs[0]:
         query_tab()
     with tabs[1]:
