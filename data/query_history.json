@@ -1,0 +1,173 @@
+[
+  {
+    "query_id": "qh_14df0d2f215e",
+    "question": "What does photosynthesis do?",
+    "answer": "Based on the uploaded materials, here is the best supported answer:\n\n[1] Photosynthesis converts light energy into chemical energy in plants.\n\nQuestion focus: What does photosynthesis do?\n\nSources:\n[1] doc_e9cbe988_46d577 (page 1, section: General)",
+    "bloom_level": "understand",
+    "confidence": 0.52,
+    "citations_count": 1,
+    "document_ids": [
+      "doc_e9cbe988_46d577"
+    ],
+    "timestamp": "2026-04-06T17:45:41.609692",
+    "response_time_ms": 36.16629994940013
+  },
+  {
+    "query_id": "qh_56f903f2e8b1",
+    "question": "What is photosynthesis?",
+    "answer": "Based on the uploaded materials, here is the best supported answer:\n\n[1] Photosynthesis converts light energy into chemical energy in plants.\n\nQuestion focus: What is photosynthesis?\n\nSources:\n[1] doc_e9cbe988_90dc1c (page 1, section: General)",
+    "bloom_level": "remember",
+    "confidence": 0.557,
+    "citations_count": 1,
+    "document_ids": [
+      "doc_e9cbe988_90dc1c"
+    ],
+    "timestamp": "2026-04-06T17:45:43.565199",
+    "response_time_ms": 43.65989996585995
+  },
+  {
+    "query_id": "qh_33b9e46bd603",
+    "question": "Explain photosynthesis",
+    "answer": "Based on the uploaded materials, here is the best supported answer:\n\n[1] Photosynthesis converts light energy into chemical energy in plants.\n\nQuestion focus: Explain photosynthesis\n\nSources:\n[1] doc_e9cbe988_b824a4 (page 1, section: General)",
+    "bloom_level": "understand",
+    "confidence": 0.557,
+    "citations_count": 1,
+    "document_ids": [
+      "doc_e9cbe988_b824a4"
+    ],
+    "timestamp": "2026-04-06T17:45:44.621452",
+    "response_time_ms": 118.64560004323721
+  },
+  {
+    "query_id": "qh_764c336da0a4",
+    "question": "Explain photosynthesis",
+    "answer": "Based on the uploaded materials, here is the best supported answer:\n\n[1] Photosynthesis converts light energy into chemical energy in plants.\n\nQuestion focus: Explain photosynthesis\n\nSources:\n[1] doc_e9cbe988_a38b90 (page 1, section: General)",
+    "bloom_level": "understand",
+    "confidence": 0.557,
+    "citations_count": 1,
+    "document_ids": [
+      "doc_e9cbe988_a38b90"
+    ],
+    "timestamp": "2026-04-06T17:45:46.459512",
+    "response_time_ms": 43.222200009040534
+  },
+  {
+    "query_id": "qh_5761cfa3ffd0",
+    "question": "What does photosynthesis do?",
+    "answer": "Based on the uploaded materials, here is the best supported answer:\n\n[1] Photosynthesis converts light energy into chemical energy in plants.\n\nQuestion focus: What does photosynthesis do?\n\nSources:\n[1] doc_e9cbe988_2ff3f9 (page 1, section: General)",
+    "bloom_level": "understand",
+    "confidence": 0.52,
+    "citations_count": 1,
+    "document_ids": [
+      "doc_e9cbe988_2ff3f9"
+    ],
+    "timestamp": "2026-04-06T17:52:17.774149",
+    "response_time_ms": 27087.80670003034
+  },
+  {
+    "query_id": "qh_5bdfc577fbe2",
+    "question": "What is photosynthesis?",
+    "answer": "Based on the uploaded materials, here is the best supported answer:\n\n[1] Photosynthesis converts light energy into chemical energy in plants.\n\nQuestion focus: What is photosynthesis?\n\nSources:\n[1] doc_e9cbe988_9dec72 (page 1, section: General)",
+    "bloom_level": "remember",
+    "confidence": 0.557,
+    "citations_count": 1,
+    "document_ids": [
+      "doc_e9cbe988_9dec72"
+    ],
+    "timestamp": "2026-04-06T17:54:43.742701",
+    "response_time_ms": 27019.51380004175
+  },
+  {
+    "query_id": "qh_e217e185ab0f",
+    "question": "Explain photosynthesis",
+    "answer": "Based on the uploaded materials, here is the best supported answer:\n\n[1] Photosynthesis converts light energy into chemical energy in plants.\n\nQuestion focus: Explain photosynthesis\n\nSources:\n[1] doc_e9cbe988_7237eb (page 1, section: General)",
+    "bloom_level": "understand",
+    "confidence": 0.557,
+    "citations_count": 1,
+    "document_ids": [
+      "doc_e9cbe988_7237eb"
+    ],
+    "timestamp": "2026-04-06T17:55:55.926846",
+    "response_time_ms": 27361.49869998917
+  },
+  {
+    "query_id": "qh_0a592500cfa8",
+    "question": "Explain photosynthesis",
+    "answer": "Based on the uploaded materials, here is the best supported answer:\n\n[1] Photosynthesis converts light energy into chemical energy in plants.\n\nQuestion focus: Explain photosynthesis\n\nSources:\n[1] doc_e9cbe988_d928fe (page 1, section: General)",
+    "bloom_level": "understand",
+    "confidence": 0.557,
+    "citations_count": 1,
+    "document_ids": [
+      "doc_e9cbe988_d928fe"
+    ],
+    "timestamp": "2026-04-06T17:57:22.854437",
+    "response_time_ms": 27237.63119999785
+  },
+  {
+    "query_id": "qh_974fe6803817",
+    "question": "What does photosynthesis do?",
+    "answer": "Based on the uploaded materials, here is the best supported answer:\n\n[1] Photosynthesis converts light energy into chemical energy in plants.\n\nQuestion focus: What does photosynthesis do?\n\nSources:\n[1] doc_e9cbe988_09d058 (page 1, section: General)",
+    "bloom_level": "understand",
+    "confidence": 0.52,
+    "citations_count": 1,
+    "document_ids": [
+      "doc_e9cbe988_09d058"
+    ],
+    "timestamp": "2026-04-06T18:02:24.632178",
+    "response_time_ms": 27402.230500010774
+  },
+  {
+    "query_id": "qh_216fd4db29e2",
+    "question": "What is photosynthesis?",
+    "answer": "Based on the uploaded materials, here is the best supported answer:\n\n[1] Photosynthesis converts light energy into chemical energy in plants.\n\nQuestion focus: What is photosynthesis?\n\nSources:\n[1] doc_e9cbe988_b608ca (page 1, section: General)",
+    "bloom_level": "remember",
+    "confidence": 0.557,
+    "citations_count": 1,
+    "document_ids": [
+      "doc_e9cbe988_b608ca"
+    ],
+    "timestamp": "2026-04-06T18:04:49.981506",
+    "response_time_ms": 27167.45589999482
+  },
+  {
+    "query_id": "qh_ea841cef56cd",
+    "question": "Explain photosynthesis",
+    "answer": "Based on the uploaded materials, here is the best supported answer:\n\n[1] Photosynthesis converts light energy into chemical energy in plants.\n\nQuestion focus: Explain photosynthesis\n\nSources:\n[1] doc_e9cbe988_3fda32 (page 1, section: General)",
+    "bloom_level": "understand",
+    "confidence": 0.557,
+    "citations_count": 1,
+    "document_ids": [
+      "doc_e9cbe988_3fda32"
+    ],
+    "timestamp": "2026-04-06T18:06:03.465603",
+    "response_time_ms": 27240.18199997954
+  },
+  {
+    "query_id": "qh_31700effd1f1",
+    "question": "Explain photosynthesis",
+    "answer": "Based on the uploaded materials, here is the best supported answer:\n\n[1] Photosynthesis converts light energy into chemical energy in plants.\n\nQuestion focus: Explain photosynthesis\n\nSources:\n[1] doc_e9cbe988_d33828 (page 1, section: General)",
+    "bloom_level": "understand",
+    "confidence": 0.557,
+    "citations_count": 1,
+    "document_ids": [
+      "doc_e9cbe988_d33828"
+    ],
+    "timestamp": "2026-04-06T18:07:32.525691",
+    "response_time_ms": 27286.953800008632
+  },
+  {
+    "query_id": "qh_3905d71327ad",
+    "question": "What are the different process scheduling algorithms and how does Round Robin work?",
+    "answer": "**Process Scheduling Algorithms:**\n\n1. **First-Come-First-Served (FCFS):** Processes are executed in the order they arrive. Simple, but can cause the convoy effect where short processes wait behind long ones [1].\n\n2. **Shortest Job First (SJF):** The process with the smallest burst time is selected next. Minimizes average waiting time but requires knowledge of future burst times [1].\n\n3. **Priority Scheduling:** Each process is assigned a priority; the CPU is allocated to the process with the highest priority. Can lead to starvation (solved using aging) [1].\n\n4. **Round Robin (RR):** See below.\n\n**How Round Robin (RR) Works:**\n\n- Each process is assigned a fixed time quantum (typically 10-100 milliseconds) [1].\n- Once the time quantum expires, the process is moved to the back of the ready queue [1].\n\nSources:\n[1] doc_67770d95_8b8e82 (page 1, section: General)\n[2] doc_67770d95_8b8e82 (page 2, section: General)\n[3] doc_67770d95_8b8e82 (page 3, section: General)\n[4] doc_69260e25_c2295e (page 1, section: General)\n[5] doc_a19ccc4e_15357f (page 2, section: General)",
+    "bloom_level": "remember",
+    "confidence": 1.0,
+    "citations_count": 5,
+    "document_ids": [
+      "doc_69260e25_c2295e",
+      "doc_a19ccc4e_15357f",
+      "doc_67770d95_8b8e82"
+    ],
+    "timestamp": "2026-04-06T18:39:39.998901",
+    "response_time_ms": 47957.93869998306
+  }
+]
