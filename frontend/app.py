@@ -481,11 +481,11 @@ def main() -> None:
 
     init_styles()
 
-    # Sidebar branding
+    # Sidebar: brand + navigation + documents
     with st.sidebar:
         st.markdown(
             """
-            <div style="text-align: center; padding: 12px 0 20px 0;">
+            <div style="text-align: center; padding: 12px 0 16px 0;">
               <div style="font-family: 'SF Pro Rounded', ui-rounded, system-ui, sans-serif;
                           font-size: 28px; font-weight: 500; color: #000000;
                           letter-spacing: -0.02em;">
@@ -499,6 +499,18 @@ def main() -> None:
             """,
             unsafe_allow_html=True,
         )
+
+        st.markdown("---")
+
+        # Navigation
+        pages = ["Query", "Study Guide", "Compare", "Practice Test", "Analytics"]
+        page = st.radio(
+            "Navigation",
+            pages,
+            index=0,
+            label_visibility="collapsed",
+        )
+
         st.markdown("---")
 
     sidebar_documents()
@@ -510,17 +522,16 @@ def main() -> None:
         llm_model="GLM-5",
     )
 
-    # Tabs — no emoji, clean text
-    tabs = st.tabs(["Query", "Study Guide", "Compare", "Practice Test", "Analytics"])
-    with tabs[0]:
+    # Render selected page
+    if page == "Query":
         query_tab()
-    with tabs[1]:
+    elif page == "Study Guide":
         study_guide_tab()
-    with tabs[2]:
+    elif page == "Compare":
         compare_tab()
-    with tabs[3]:
+    elif page == "Practice Test":
         practice_test_tab()
-    with tabs[4]:
+    elif page == "Analytics":
         analytics_tab()
 
     render_footer()

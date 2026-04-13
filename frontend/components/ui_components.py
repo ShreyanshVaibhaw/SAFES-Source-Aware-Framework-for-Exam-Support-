@@ -307,32 +307,9 @@ header[data-testid="stHeader"] {background: transparent;}
   flex-wrap: wrap;
 }
 
-/* === STREAMLIT TABS (pill-shaped) === */
+/* === STREAMLIT TABS (hidden — using sidebar nav instead) === */
 .stTabs [data-baseweb="tab-list"] {
-  gap: 4px;
-  background: transparent;
-  padding: 4px;
-  border: none;
-}
-
-.stTabs [data-baseweb="tab"] {
-  border-radius: 9999px !important;
-  padding: 8px 20px !important;
-  font-weight: 400 !important;
-  font-size: 14px !important;
-  color: var(--stone) !important;
-  background: transparent !important;
-  border: none !important;
-}
-
-.stTabs [data-baseweb="tab"]:hover {
-  background: var(--snow) !important;
-  color: var(--black) !important;
-}
-
-.stTabs [aria-selected="true"] {
-  background: var(--border) !important;
-  color: var(--near-black) !important;
+  display: none !important;
 }
 
 /* === BUTTONS (pill-shaped) === */
@@ -428,6 +405,13 @@ header[data-testid="stHeader"] {background: transparent;}
 section[data-testid="stSidebar"] {
   background: var(--white) !important;
   border-right: 1px solid var(--border);
+  min-width: 0px !important;
+}
+
+section[data-testid="stSidebar"][aria-expanded="false"] {
+  min-width: 0px !important;
+  width: 0px !important;
+  margin-left: -1px !important;
 }
 
 section[data-testid="stSidebar"] * {
@@ -439,6 +423,50 @@ section[data-testid="stSidebar"] h2,
 section[data-testid="stSidebar"] h3 {
   color: var(--black);
   font-weight: 500;
+}
+
+/* === SIDEBAR NAV (radio buttons as pill nav) === */
+section[data-testid="stSidebar"] .stRadio > div {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+}
+
+section[data-testid="stSidebar"] .stRadio > div > label {
+  border-radius: 9999px !important;
+  padding: 8px 16px !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  color: var(--stone) !important;
+  cursor: pointer !important;
+  transition: background 0.15s ease !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+section[data-testid="stSidebar"] .stRadio > div > label:hover {
+  background: var(--snow) !important;
+  color: var(--black) !important;
+}
+
+/* Selected nav item */
+section[data-testid="stSidebar"] .stRadio > div > label[data-checked="true"],
+section[data-testid="stSidebar"] .stRadio > div > label:has(input:checked) {
+  background: var(--border) !important;
+  color: var(--black) !important;
+  font-weight: 500 !important;
+}
+
+/* Hide the radio circle */
+section[data-testid="stSidebar"] .stRadio > div > label > div:first-child {
+  display: none !important;
+}
+
+/* Hide radio label header */
+section[data-testid="stSidebar"] .stRadio > label {
+  display: none !important;
 }
 
 /* === FILE UPLOADER === */
