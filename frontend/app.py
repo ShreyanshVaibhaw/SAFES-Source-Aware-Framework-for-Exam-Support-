@@ -24,6 +24,7 @@ from frontend.components.ui_components import (
     render_footer,
     render_grounding_alert,
     render_hero,
+    theme_selector,
     render_practice_questions,
     render_section_header,
 )
@@ -479,19 +480,22 @@ def main() -> None:
         initial_sidebar_state="expanded",
     )
 
-    init_styles()
+    # Theme state
+    if "safes_theme" not in st.session_state:
+        st.session_state.safes_theme = "Minimal"
+    init_styles(st.session_state.safes_theme)
 
-    # Sidebar: brand + navigation + documents
+    # Sidebar: brand + theme + navigation + documents
     with st.sidebar:
         st.markdown(
             """
             <div style="text-align: center; padding: 12px 0 16px 0;">
               <div style="font-family: 'SF Pro Rounded', ui-rounded, system-ui, sans-serif;
-                          font-size: 28px; font-weight: 500; color: #000000;
+                          font-size: 28px; font-weight: 500; color: var(--text);
                           letter-spacing: -0.02em;">
                 SAFES
               </div>
-              <div style="font-size: 12px; color: #a3a3a3; text-transform: uppercase;
+              <div style="font-size: 12px; color: var(--faint); text-transform: uppercase;
                           letter-spacing: 0.1em; font-weight: 400; margin-top: 2px;">
                 Study Assistant
               </div>
@@ -499,6 +503,9 @@ def main() -> None:
             """,
             unsafe_allow_html=True,
         )
+
+        # Theme picker
+        theme_selector()
 
         st.markdown("---")
 
