@@ -272,23 +272,29 @@ section[data-testid="stSidebar"] .stRadio > label {{ display: none !important; }
 [data-testid="stFileUploaderDropzone"] span {{ color: var(--text2) !important; }}
 [data-testid="stFileUploaderDropzone"] small {{ color: var(--faint) !important; }}
 [data-testid="stFileUploaderDropzone"] svg {{ color: var(--muted) !important; }}
+/* Hide ALL buttons inside the dropzone by default */
 [data-testid="stFileUploaderDropzone"] button {{
+  display: none !important;
+}}
+/* Show only the FIRST button (Browse) */
+[data-testid="stFileUploaderDropzone"] button:first-of-type {{
+  display: inline-flex !important;
   font-size: 0 !important; line-height: 0 !important; text-indent: -9999px !important;
   background: var(--active) !important; border: none !important; border-radius: 9999px !important;
   padding: 8px 18px !important; min-width: 120px !important; height: 36px !important;
-  cursor: pointer !important; box-shadow: none !important; display: inline-flex !important;
+  cursor: pointer !important; box-shadow: none !important;
   align-items: center !important; justify-content: center !important;
 }}
-[data-testid="stFileUploaderDropzone"] button > * {{
+[data-testid="stFileUploaderDropzone"] button:first-of-type > * {{
   font-size: 0 !important; visibility: hidden !important; width: 0 !important; height: 0 !important;
   position: absolute !important; left: -9999px !important;
 }}
-[data-testid="stFileUploaderDropzone"] button::before {{
+[data-testid="stFileUploaderDropzone"] button:first-of-type::before {{
   content: 'Browse'; font-size: 14px !important; font-weight: 500 !important; color: var(--text2) !important;
   text-indent: 0 !important; visibility: visible !important; position: static !important;
   display: inline-block !important; width: auto !important; height: auto !important;
 }}
-[data-testid="stFileUploaderDropzone"] button:hover {{ background: var(--hover) !important; }}
+[data-testid="stFileUploaderDropzone"] button:first-of-type:hover {{ background: var(--hover) !important; }}
 [data-testid="stFileUploaderDeleteBtn"] button {{ background: transparent !important; color: var(--muted) !important; }}
 [data-testid="stFileUploaderDeleteBtn"] button::before {{ content: '' !important; }}
 
