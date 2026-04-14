@@ -298,13 +298,18 @@ section[data-testid="stSidebar"] .stRadio > label {{ display: none !important; }
 [data-testid="stFileUploaderDeleteBtn"] button {{ background: transparent !important; color: var(--muted) !important; }}
 [data-testid="stFileUploaderDeleteBtn"] button::before {{ content: '' !important; }}
 
-/* Hide the duplicate Browse button that appears outside the dropzone when a file is selected */
-section[data-testid="stSidebar"] [data-testid="stBaseButton-secondary"] {{
+/* NUCLEAR: Hide every button/element related to file uploader EXCEPT the one we styled */
+/* The stFileUploader widget has multiple buttons — hide all secondary ones */
+[data-testid="stFileUploader"] button {{
   display: none !important;
 }}
-/* But keep the one inside the dropzone visible */
-section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] [data-testid="stBaseButton-secondary"] {{
+/* Only show the first button inside the dropzone (our styled Browse) */
+[data-testid="stFileUploaderDropzone"] button:first-of-type {{
   display: inline-flex !important;
+}}
+/* Also hide any stBaseButton-secondary near the uploader */
+[data-testid="stFileUploader"] [data-testid="stBaseButton-secondary"] {{
+  display: none !important;
 }}
 
 /* === Metrics === */
