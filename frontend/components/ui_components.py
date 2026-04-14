@@ -298,6 +298,15 @@ section[data-testid="stSidebar"] .stRadio > label {{ display: none !important; }
 [data-testid="stFileUploaderDeleteBtn"] button {{ background: transparent !important; color: var(--muted) !important; }}
 [data-testid="stFileUploaderDeleteBtn"] button::before {{ content: '' !important; }}
 
+/* Hide the duplicate Browse button that appears outside the dropzone when a file is selected */
+section[data-testid="stSidebar"] [data-testid="stBaseButton-secondary"] {{
+  display: none !important;
+}}
+/* But keep the one inside the dropzone visible */
+section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] [data-testid="stBaseButton-secondary"] {{
+  display: inline-flex !important;
+}}
+
 /* === Metrics === */
 [data-testid="stMetric"] {{ background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; }}
 [data-testid="stMetricValue"] {{
